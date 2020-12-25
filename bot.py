@@ -9,7 +9,7 @@ from datetime import datetime
 from html_sanitizer import Sanitizer
 
 print(os.getenv("SPACE_BOT_TOKEN"))
-bot = telebot.TeleBot(os.getenv("SPACE_BOT_TOKEN"))
+bot = telebot.TeleBot(os.os.environ["SPACE_BOT_TOKEN"])
 
 defaultPath = "http://sisav.uem.br/sav"
 rSplitMaterias = r"\s\d\d\d\d\s"
