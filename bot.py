@@ -8,8 +8,8 @@ import requests
 from datetime import datetime
 from html_sanitizer import Sanitizer
 
+print(os.getenv("SPACE_BOT_TOKEN"))
 bot = telebot.TeleBot(os.getenv("SPACE_BOT_TOKEN"))
-bot.polling(none_stop=True, interval=0)
 
 defaultPath = "http://sisav.uem.br/sav"
 rSplitMaterias = r"\s\d\d\d\d\s"
@@ -38,35 +38,30 @@ def send_start_message(message):
 @bot.message_handler(commands=['notas','nota'],content_types=['text'])
 def send_notas_message(message):
 	# mensagem /notas raxxxxxx <senha>
-	try:
-		_, username, password = message.text.split()
-		currentYear = str(datetime.now().year)
-		urlNota = defaultPath+'/consultaNotas/notasAno?ano='+currentYear
+	_, username, password = message.text.split()
+	currentYear = str(datetime.now().year)
+	urlNota = defaultPath+'/consultaNotas/notasAno?ano='+currentYear
 
-		sanitizer = Sanitizer()
-		usuario = User(t_user=message.from_user,username=username,password=password)
-		reqController = usuario.session
-		# faz login
-		payload = {'username': username,'password':password}
-		response = reqController.post('http://sisav.uem.br/sav/auth/signIn/frmLogin',data=payload)
-		if(int(response.status_code) == 200):
-			# pega a mensagem e tokeniza
-			response = reqController.get(urlNota)
-			cleaned = sanitizer.sanitize(response.text)
-			tokenized = re.split(rSplitMaterias,cleaned)
-			# faz o parse das informacoes
-			materiasComNotas = [re.sub(htmlTags,"|",element) for element in tokenized if("Notas" in element and "_tabelaNotas" not in element)]
-			materiasComNotas = [materia.split("|") for materia in materiasComNotas]
-			materiasComNotas = [list(filter((lambda x: not(x == '' or x==' ' or x==' Aprovado ')), i)) for i in materiasComNotas] 
-			materiasComNotas = materiasComNotas[:7]
-			usuario.notas = materiasComNotas
-			parsedResult = ""
-			for materia in materiasComNotas:
-				parsedResult += prettyPrint(materia)
-			bot.reply_to(message,parsedResult)
-		else:
-			bot.reply_to(message,"Deu merda ai meu bom, da uma olhada no codigo http: {}".format(response.status_code))
-	except Exception as e:
-		bot.reply_to(message,"Deu merda ai meu bom, da uma olhada: {}".format(e))
+	sanitizer = Sanitizer()
+	usuario = User(t_user=message.from_user,username=username,password=password)
+	reqController = usuario.session
+	# faz login
+	payload = {'username': username,'password':password}
+	response = reqController.post('http://sisav.uem.br/sav/auth/signIn/frmLogin',data=payload)
+	
+	# pega a mensagem e tokeniza
+	response = reqController.get(urlNota)
+	cleaned = sanitizer.sanitize(response.text)
+	tokenized = re.split(rSplitMaterias,cleaned)
+	# faz o parse das informacoes
+	materiasComNotas = [re.sub(htmlTags,"|",element) for element in tokenized if("Notas" in element and "_tabelaNotas" not in element)]
+	materiasComNotas = [materia.split("|") for materia in materiasComNotas]
+	materiasComNotas = [list(filter((lambda x: not(x == '' or x==' ' or x==' Aprovado ')), i)) for i in materiasComNotas] 
+	materiasComNotas = materiasComNotas[:7]
+	usuario.notas = materiasComNotas
+	parsedResult = ""
+	for materia in materiasComNotas:
+		parsedResult += prettyPrint(materia)
+	bot.reply_to(message,parsedResult)
 			
 bot.polling()
