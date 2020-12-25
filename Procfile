@@ -1,1 +1,1 @@
-web: $SPACE_BOT_TOKEN python3 bot.py
+web: python3 bot.py
