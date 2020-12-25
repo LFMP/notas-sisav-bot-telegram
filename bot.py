@@ -6,7 +6,6 @@ import urllib
 import json
 import requests
 from datetime import datetime
-from bs4 import BeautifulSoup
 from html_sanitizer import Sanitizer
 
 bot = telebot.TeleBot(os.environ["SPACE_BOT_TOKEN"])
