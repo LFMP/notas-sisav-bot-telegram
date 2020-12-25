@@ -8,7 +8,7 @@ import requests
 from datetime import datetime
 from html_sanitizer import Sanitizer
 
-bot = telebot.TeleBot(os.environ["SPACE_BOT_TOKEN"])
+bot = telebot.TeleBot(os.getenv("SPACE_BOT_TOKEN"))
 bot.polling(none_stop=True, interval=0)
 
 defaultPath = "http://sisav.uem.br/sav"
